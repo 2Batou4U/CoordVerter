@@ -1,0 +1,16 @@
+name: CoordVerter
+version: '${project.version}'
+main: de.froschcraft.coordverter.CoordVerter
+description: Converts overworld coords for the nether and vice versa.
+author: 2Batou4U
+website: http://froschcraft.de
+api-version: '1.20'
+commands:
+  convert:
+    description: Converts coordinates between Overworld and Nether.
+    usage: /<command> <dimension> <coordinate>
+
+permissions:
+  coordverter.convert:
+    description: Grants usage for the /convert command.
+    default: op
