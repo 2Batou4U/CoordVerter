@@ -1,26 +1,35 @@
 package de.froschcraft.coordverter;
 
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 import java.util.logging.Logger;
 
 public final class CoordVerter extends JavaPlugin implements Listener
 {
+    // For formatting Minecraft messages.
+    @NotNull
+    private MiniMessage mm = MiniMessage.miniMessage();
+    FileConfiguration config = this.getConfig();
+    Logger log = this.getLogger();
+
     @Override
     public void onEnable() {
-        Logger log = getLogger();
-        log.info("Starting CoordVerter.");
+        // Load the logger
+        log.info(config.getString("messages.starting-message"));
+
         // Plugin startup logic
         Bukkit.getPluginManager().registerEvents(this, this);
-        Objects.requireNonNull(this.getCommand("convert")).setExecutor(new CoordVerterCommand());
+        Objects.requireNonNull(this.getCommand("convert")).setExecutor(new CoordVerterCommand(config, mm));
         Objects.requireNonNull(this.getCommand("convert")).setTabCompleter(new CoordVerterTabCompleter());
     }
 
     public void onDisable() {
-        Logger log = getLogger();
-        log.info("Stopping CoordVerter.");
+        log.info(config.getString("messages.starting-message"));
     }
 }

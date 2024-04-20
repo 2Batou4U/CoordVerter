@@ -6,30 +6,41 @@ import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Objects;
+
 public class CoordVerterCommand implements CommandExecutor
 {
+    private final MiniMessage mm;
+    private final FileConfiguration config;
+
+    public CoordVerterCommand(FileConfiguration config, MiniMessage mm)
+    {
+        // We don't want to duplicate any unnecessary objects.
+        this.config = config;
+        this.mm = mm;
+    }
+
     @Override
     public boolean onCommand(@NotNull CommandSender sender,
                              @NotNull Command command,
                              @NotNull String label,
                              String[] args)
     {
-        // For formatting Minecraft messages.
-        @NotNull MiniMessage mm = MiniMessage.miniMessage();
 
         // Block command line users from using the command.
         if (!(sender instanceof Player)) {
-            Component command_user_error = mm.deserialize("<dark_grey>This command can only be used by <underline>players</underline>.</dark_grey>");
+            Component command_user_error = mm.deserialize(Objects.requireNonNull(config.getString("messages.command-user-error")));
             sender.sendMessage(command_user_error);
             return true;
         }
 
         // Check for permissions
         if (!sender.hasPermission("coordverter.convert")) {
-            Component missing_permission_error = mm.deserialize("<dark_grey>You lack the rights to use this command. Womp womp</dark_grey>");
+            Component missing_permission_error = mm.deserialize(Objects.requireNonNull(config.getString("messages.missing-permission-error")));
             sender.sendMessage(missing_permission_error);
             return true;
         }
@@ -39,7 +50,7 @@ public class CoordVerterCommand implements CommandExecutor
          * Bukkit handle the usage functionality but here we get some nice formatting.
          */
         if (args.length != 4) {
-            Component argument_amount_error = mm.deserialize("<dark_grey>Usage: /convert <world> <x> <y> <z></dark_grey>");
+            Component argument_amount_error = mm.deserialize(Objects.requireNonNull(config.getString("messages.argument-amount-error")));
             sender.sendMessage(argument_amount_error);
             return true;
         }
@@ -63,7 +74,7 @@ public class CoordVerterCommand implements CommandExecutor
             }
 
         } catch (NumberFormatException e) {
-            Component invalid_format_error = mm.deserialize("<dark_grey>Invalid coordinate format.</dark_grey>");
+            Component invalid_format_error = mm.deserialize(Objects.requireNonNull(config.getString("messages.invalid-format-error")));
             sender.sendMessage(invalid_format_error);
             return true;
         }
@@ -94,8 +105,8 @@ public class CoordVerterCommand implements CommandExecutor
 
         } else {
 
-            Component argument_amount_error = mm.deserialize("<dark_grey>Unknown dimension. Options are:\n<aqua>Overworld</aqua>, <red>Nether</red></dark_grey>");
-            sender.sendMessage(argument_amount_error);
+            Component unknown_dimension_error = mm.deserialize(Objects.requireNonNull(config.getString("messages.invalid-format-error")));
+            sender.sendMessage(unknown_dimension_error);
             return true;
 
         }
@@ -104,16 +115,27 @@ public class CoordVerterCommand implements CommandExecutor
          * Build table from string block. All right, why does it look so ugly? >.< Because BuildString introduced a bug with the amount
          * of whitespace characters shifting the output in Minecraft, this solution works.
          */
-        String table = String.format("""
-<newline><font:uniform><dark_grey><click:copy_to_clipboard:%.0f %.0f %.0f><hover:show_text:'Copy to Clipboard'><aqua>%-12s</aqua></hover></click>|%12.0f|%12.0f|%12.0f</dark_grey>
-<dark_grey><click:copy_to_clipboard:%.0f %.0f %.0f><hover:show_text:'Copy to Clipboard'><red>%-12s</red></hover></click>|%12.0f|%12.0f|%12.0f</dark_grey></font><newline>""",
-                overworld_coords[0], overworld_coords[1], overworld_coords[2],
-                "Overworld", overworld_coords[0], overworld_coords[1], overworld_coords[2],
-                nether_coords[0], nether_coords[1], nether_coords[2],
-                "Nether", nether_coords[0], nether_coords[1], nether_coords[2]);
+        String output =  Objects.requireNonNull(config.getString("messages.prefix-output")) +
+                Objects.requireNonNull(config.getString("messages.overworld-output")) +
+                Objects.requireNonNull(config.getString("messages.nether-output")) +
+                Objects.requireNonNull(config.getString("messages.suffix-output"));
+
+        // Replace overworld coordinates.
+        output = output.replace("${x_ow}", String.format("%12.0f", overworld_coords[0]));
+        output = output.replace("${y_ow}", String.format("%12.0f", overworld_coords[1]));
+        output = output.replace("${z_ow}", String.format("%12.0f", overworld_coords[2]));
+
+        // Replace nether coordinates.
+        output = output.replace("${x_nt}", String.format("%12.0f", nether_coords[0]));
+        output = output.replace("${y_nt}", String.format("%12.0f", nether_coords[1]));
+        output = output.replace("${z_nt}", String.format("%12.0f", nether_coords[2]));
+
+        // Replace world names.
+        output = output.replace("${overworld}", String.format("%-12s", Objects.requireNonNull(config.getString("messages.overworld-name"))));
+        output = output.replace("${nether}", String.format("%-12s", Objects.requireNonNull(config.getString("messages.nether-name"))));
 
         // Deserialize and output table to the user.
-        Component table_deserialized = mm.deserialize(table);
+        Component table_deserialized = mm.deserialize(output);
         sender.sendMessage(table_deserialized);
 
         return true;
