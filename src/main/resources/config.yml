@@ -9,6 +9,6 @@ messages:
   overworld-name: "Overworld"
   nether-name: "Nether"
   prefix-output: "<newline>"
-  overworld-output: "<newline><font:uniform><dark_grey><click:copy_to_clipboard:${x_ow} ${y_ow} ${z_ow}><hover:show_text:'Copy to Clipboard'><aqua>${overworld}</aqua></hover></click>|${x_ow}|${y_ow}|${z_ow}|</dark_grey></font>"
-  nether-output: "<newline><font:uniform><dark_grey><click:copy_to_clipboard:${x_nt} ${y_nt} ${z_nt}><hover:show_text:'Copy to Clipboard'><red>${nether}</red></hover></click>|${x_nt}|${y_nt}|${z_nt}|</dark_grey></font>"
+  overworld-output: "<newline><dark_grey><click:copy_to_clipboard:${x_ow} ${y_ow} ${z_ow}><hover:show_text:'Copy to Clipboard'><aqua>${overworld}</aqua></hover></click>|${x_ow}|${y_ow}|${z_ow}|</dark_grey>"
+  nether-output: "<newline><dark_grey><click:copy_to_clipboard:${x_nt} ${y_nt} ${z_nt}><hover:show_text:'Copy to Clipboard'><red>${nether}</red></hover></click>|${x_nt}|${y_nt}|${z_nt}|</dark_grey>"
   suffix-output: "<newline>"

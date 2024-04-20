@@ -14,9 +14,11 @@ public final class CoordVerter extends JavaPlugin implements Listener
 {
     // For formatting Minecraft messages.
     @NotNull
-    private MiniMessage mm = MiniMessage.miniMessage();
-    FileConfiguration config = this.getConfig();
-    Logger log = this.getLogger();
+    private final MiniMessage mm = MiniMessage.miniMessage();
+    @NotNull
+    private final FileConfiguration config = this.getConfig();
+    @NotNull
+    private final Logger log = this.getLogger();
 
     @Override
     public void onEnable() {

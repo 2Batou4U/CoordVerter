@@ -17,11 +17,20 @@ public class CoordVerterCommand implements CommandExecutor
     private final MiniMessage mm;
     private final FileConfiguration config;
 
-    public CoordVerterCommand(FileConfiguration config, MiniMessage mm)
+    public CoordVerterCommand(@NotNull FileConfiguration config,
+                              @NotNull MiniMessage mm)
     {
         // We don't want to duplicate any unnecessary objects.
         this.config = config;
         this.mm = mm;
+    }
+
+    private String getConfig(@NotNull String key, String formatOptions) {
+        String config_element = Objects.requireNonNull(config.getString(key));
+
+        if (Objects.isNull(formatOptions)) return config_element;
+        else return String.format(formatOptions, config_element);
+
     }
 
     @Override
@@ -33,14 +42,14 @@ public class CoordVerterCommand implements CommandExecutor
 
         // Block command line users from using the command.
         if (!(sender instanceof Player)) {
-            Component command_user_error = mm.deserialize(Objects.requireNonNull(config.getString("messages.command-user-error")));
+            Component command_user_error = mm.deserialize(getConfig("messages.command-user-error", null));
             sender.sendMessage(command_user_error);
             return true;
         }
 
         // Check for permissions
         if (!sender.hasPermission("coordverter.convert")) {
-            Component missing_permission_error = mm.deserialize(Objects.requireNonNull(config.getString("messages.missing-permission-error")));
+            Component missing_permission_error = mm.deserialize(getConfig("messages.missing-permission-error", null));
             sender.sendMessage(missing_permission_error);
             return true;
         }
@@ -50,7 +59,7 @@ public class CoordVerterCommand implements CommandExecutor
          * Bukkit handle the usage functionality but here we get some nice formatting.
          */
         if (args.length != 4) {
-            Component argument_amount_error = mm.deserialize(Objects.requireNonNull(config.getString("messages.argument-amount-error")));
+            Component argument_amount_error = mm.deserialize(getConfig("messages.argument-amount-error", null));
             sender.sendMessage(argument_amount_error);
             return true;
         }
@@ -74,7 +83,7 @@ public class CoordVerterCommand implements CommandExecutor
             }
 
         } catch (NumberFormatException e) {
-            Component invalid_format_error = mm.deserialize(Objects.requireNonNull(config.getString("messages.invalid-format-error")));
+            Component invalid_format_error = mm.deserialize(getConfig("messages.invalid-format-error", null));
             sender.sendMessage(invalid_format_error);
             return true;
         }
@@ -105,7 +114,7 @@ public class CoordVerterCommand implements CommandExecutor
 
         } else {
 
-            Component unknown_dimension_error = mm.deserialize(Objects.requireNonNull(config.getString("messages.invalid-format-error")));
+            Component unknown_dimension_error = mm.deserialize(getConfig("messages.invalid-format-error", null));
             sender.sendMessage(unknown_dimension_error);
             return true;
 
@@ -115,24 +124,24 @@ public class CoordVerterCommand implements CommandExecutor
          * Build table from string block. All right, why does it look so ugly? >.< Because BuildString introduced a bug with the amount
          * of whitespace characters shifting the output in Minecraft, this solution works.
          */
-        String output =  Objects.requireNonNull(config.getString("messages.prefix-output")) +
-                Objects.requireNonNull(config.getString("messages.overworld-output")) +
-                Objects.requireNonNull(config.getString("messages.nether-output")) +
-                Objects.requireNonNull(config.getString("messages.suffix-output"));
+        String output = getConfig("messages.prefix-output", null) +
+                getConfig("messages.overworld-output", null) +
+                getConfig("messages.nether-output", null) +
+                getConfig("messages.suffix-output", null);
 
         // Replace overworld coordinates.
-        output = output.replace("${x_ow}", String.format("%12.0f", overworld_coords[0]));
-        output = output.replace("${y_ow}", String.format("%12.0f", overworld_coords[1]));
-        output = output.replace("${z_ow}", String.format("%12.0f", overworld_coords[2]));
+        output = output.replace("${x_ow}", String.format("%12.0f", overworld_coords[0]))
+        .replace("${y_ow}", String.format("%12.0f", overworld_coords[1]))
+        .replace("${z_ow}", String.format("%12.0f", overworld_coords[2]))
 
         // Replace nether coordinates.
-        output = output.replace("${x_nt}", String.format("%12.0f", nether_coords[0]));
-        output = output.replace("${y_nt}", String.format("%12.0f", nether_coords[1]));
-        output = output.replace("${z_nt}", String.format("%12.0f", nether_coords[2]));
+        .replace("${x_nt}", String.format("%12.0f", nether_coords[0]))
+        .replace("${y_nt}", String.format("%12.0f", nether_coords[1]))
+        .replace("${z_nt}", String.format("%12.0f", nether_coords[2]))
 
         // Replace world names.
-        output = output.replace("${overworld}", String.format("%-12s", Objects.requireNonNull(config.getString("messages.overworld-name"))));
-        output = output.replace("${nether}", String.format("%-12s", Objects.requireNonNull(config.getString("messages.nether-name"))));
+        .replace("${overworld}", getConfig("messages.overworld-name","%-12s"))
+        .replace("${nether}", getConfig("messages.nether-name","%-12s"));
 
         // Deserialize and output table to the user.
         Component table_deserialized = mm.deserialize(output);
